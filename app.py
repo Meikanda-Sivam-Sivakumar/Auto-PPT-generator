@@ -39,7 +39,7 @@ class LLMOrchestrator:
         Create a JSON structure with slides containing titles and bullet points.
         {notes_instruction}
         
-        Guidelines: {guidance if guidance else "Create a professional presentation with clear structure "}
+        Guidelines: {guidance + "by above guidelines ,create presentation with clear structure " if guidance else "Create a professional presentation with clear structure "}
         
         Text to convert:
         {text}
