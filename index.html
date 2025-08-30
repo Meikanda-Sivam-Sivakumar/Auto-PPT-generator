@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI PowerPoint Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: 3rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .form-control {
+            border: 2px solid #e8ecef;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: #fafbfc;
+        }
+        
+        .form-control:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background-color: #ffffff;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            padding: 16px 32px;
+            font-weight: 600;
+            font-size: 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4);
+            background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        }
+        
+        .provider-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 0.75rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .provider-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(79, 70, 229, 0.5), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        
+        .provider-card:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .provider-card:hover {
+            border-color: #4f46e5;
+            background-color: #fafbff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.15);
+        }
+        
+        .provider-card.selected {
+            border-color: #4f46e5;
+            background: linear-gradient(135deg, #fafbff 0%, #f3f4f6 100%);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2);
+        }
+        
+        .loading-spinner {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+        
+        .status-message {
+            display: none;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border: 1px solid #86efac;
+            color: #065f46;
+        }
+        
+        .status-error {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 1px solid #f87171;
+            color: #991b1b;
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .header-icon {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+        
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #6b7280;
+            font-weight: 400;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        
+        .form-text {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+        
+        .file-info {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 8px;
+            font-size: 14px;
+            border: 1px solid #bfdbfe;
+            display: none;
+        }
+        
+        .form-check-input:checked {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #fafbfc;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .section-icon {
+            color: #4f46e5;
+            margin-right: 8px;
+            width: 20px;
+        }
+        
+        .creator-credit {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        /* Professional Enhancement Styles */
+        .provider-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1f2937;
+        }
+        
+        .provider-description {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .download-section {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(22, 163, 74, 0.1) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+        
+        .footer {
+            margin-top: 80px;
+            padding: 40px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ffd700 0%, #ff6b6b 50%, #4ecdc4 100%);
+        }
+        
+        .footer strong {
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .footer .text-muted {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .footer .text-primary {
+            color: #ffd700 !important;
+        }
+        
+        /* Enhanced animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-section {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .form-section:nth-child(2) { animation-delay: 0.1s; }
+        .form-section:nth-child(3) { animation-delay: 0.2s; }
+        .form-section:nth-child(4) { animation-delay: 0.3s; }
+        .form-section:nth-child(5) { animation-delay: 0.4s; }
+        
+        .creator-credit {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+        
+        .creator-credit::before {
+            content: '⚡';
+            margin-right: 6px;
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .provider-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .provider-description {
+            color: #6b7280;
+            font-size: 13px;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3em;
+        }
+        
+        .loading-text {
+            margin-top: 1rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .help-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .help-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(79, 70, 229, 0.4);
+        }
+        
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1.5rem;
+        }
+        
+        .accordion-button {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            background-color: #f8faff;
+            color: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="main-container">
+                    <!-- Header -->
+                    <div class="header-section">
+                        <i class="fas fa-presentation header-icon"></i>
+                        <h1 class="main-title">AI PowerPoint Generator</h1>
+                        <p class="subtitle">Transform your content into professional presentations with artificial intelligence</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="pptForm">
+                        <!-- Content Input Section -->
+                        <div class="form-section">
+                            <label for="textInput" class="form-label">
+                                <i class="fas fa-edit section-icon"></i>Content Input
+                            </label>
+                            <textarea 
+                                class="form-control" 
+                                id="textInput" 
+                                rows="6" 
+                                placeholder="Enter your content here... (articles, research, notes, outlines, etc.)"
+                                required
+                            ></textarea>
+                            <div class="form-text">Provide the text content you want to convert into a professional presentation</div>
+                        </div>
+
+                        <!-- AI Configuration Section -->
+                        <div class="form-section">
+                            <label class="form-label">
+                                <i class="fas fa-brain section-icon"></i>AI Provider Selection
+                            </label>
+                            <div id="providerCards">
+                                <div class="provider-card" data-provider="openai">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fab fa-openai fa-2x me-3" style="color: #00a67e;"></i>
+                                        <div>
+                                            <div class="provider-name">OpenAI GPT</div>
+                                            <div class="provider-description">Industry-leading language model with superior content generation</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="provider-card" data-provider="anthropic">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-atom fa-2x me-3" style="color: #d4822a;"></i>
+                                        <div>
+                                            <div class="provider-name">Anthropic Claude</div>
+                                            <div class="provider-description">Advanced reasoning capabilities with enhanced safety features</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="provider-card" data-provider="groq">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-rocket fa-2x me-3" style="color: #f55036;"></i>
+                                        <div>
+                                            <div class="provider-name">Groq Lightning</div>
+                                            <div class="provider-description">Ultra-fast inference with optimized performance</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Authentication Section -->
+                        <div class="form-section">
+                            <label for="apiKey" class="form-label">
+                                <i class="fas fa-key section-icon"></i>API Authentication
+                            </label>
+                            <input 
+                                type="password" 
+                                class="form-control" 
+                                id="apiKey" 
+                                placeholder="Enter your API key"
+                                required
+                            >
+                            <div class="form-text">
+                                <i class="fas fa-shield-alt"></i> 
+                                Your API key is processed securely and never stored on our servers
+                            </div>
+                        </div>
+
+                        <!-- Customization Section -->
+                        <div class="form-section">
+                            <label class="form-label">
+                                <i class="fas fa-cogs section-icon"></i>Presentation Customization
+                            </label>
+                            
+                            <div class="mb-3">
+                                <label for="guidance" class="form-label">Content Guidelines</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="guidance" 
+                                    placeholder="e.g., 'Executive summary style' or 'Technical documentation format'"
+                                >
+                                <div class="form-text">Specify the tone, style, or structure preferences for your presentation</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="templateFile" class="form-label">Custom Template</label>
+                                <input 
+                                    type="file" 
+                                    class="form-control" 
+                                    id="templateFile" 
+                                    accept=".pptx,.potx"
+                                >
+                                <div class="form-text">
+                                    Upload a PowerPoint template (.pptx or .potx) to maintain brand consistency
+                                </div>
+                                <div class="file-info" id="fileInfo">
+                                    <i class="fas fa-file-powerpoint"></i>
+                                    <span id="fileName"></span>
+                                    <span id="fileSize" class="text-muted"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="includeNotes">
+                                <label class="form-check-label" for="includeNotes">
+                                    <i class="fas fa-comment-alt section-icon"></i>Generate Speaker Notes
+                                </label>
+                                <div class="form-text">Include detailed presenter notes to enhance your delivery</div>
+                            </div>
+                        </div>
+
+                        <!-- Action Section -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
+                                <i class="fas fa-magic"></i> Generate Presentation
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Status and Results -->
+                    <div id="statusContainer" class="alert alert-info" style="display: none;">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-3" role="status">
+                                <span class="visually-hidden">Processing...</span>
+                            </div>
+                            <div>
+                                <strong>Processing Your Request</strong>
+                                <div id="statusText">Initializing presentation generation...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="downloadSection" class="download-section" style="display: none;">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1 text-success">Presentation Generated Successfully</h5>
+                                        <p class="mb-0 text-muted">Your PowerPoint presentation is ready for download</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <a href="#" id="downloadLink" class="btn btn-success btn-lg">
+                                    <i class="fas fa-download"></i> Download PPTX
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="errorSection" class="alert alert-danger" style="display: none;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Generation Failed</h5>
+                                <div id="errorText">An error occurred during processing</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div class="loading-spinner" id="loadingSpinner">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Generating your presentation... This may take a few moments.</p>
+                        </div>
+                    </div>
+
+                    <!-- Status Messages -->
+                    <div class="status-message" id="statusMessage"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Professional Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-code text-primary me-2"></i>
+                        <span class="text-muted">Created by</span>
+                        <strong class="ms-1">Meikanda Sivam</strong>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="d-flex align-items-center justify-content-md-end">
+                        <i class="fas fa-magic text-primary me-2"></i>
+                        <span class="text-muted">AI-Powered Presentation Generator</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Instructions Modal -->
+    <div class="modal fade" id="instructionsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">How to Get API Keys</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="apiInstructions">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#openaiInstructions">
+                                    OpenAI API Key
+                                </button>
+                            </h2>
+                            <div id="openaiInstructions" class="accordion-collapse collapse show">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li>Go to <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a></li>
+                                        <li>Sign in or create an account</li>
+                                        <li>Click "Create new secret key"</li>
+                                        <li>Copy the key (starts with "sk-")</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#anthropicInstructions">
+                                    Anthropic API Key
+                                </button>
+                            </h2>
+                            <div id="anthropicInstructions" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li>Go to <a href="https://console.anthropic.com/account/keys" target="_blank">Anthropic Console</a></li>
+                                        <li>Sign in or create an account</li>
+                                        <li>Click "Create Key"</li>
+                                        <li>Copy the key (starts with "sk-ant-")</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#groqInstructions">
+                                    Groq API Key
+                                </button>
+                            </h2>
+                            <div id="groqInstructions" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li>Go to <a href="https://console.groq.com/keys" target="_blank">Groq Console</a></li>
+                                        <li>Sign in or create an account</li>
+                                        <li>Click "Create API Key"</li>
+                                        <li>Copy the key (starts with "gsk_")</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Button -->
+    <div class="position-fixed bottom-0 end-0 m-4">
+        <button class="btn btn-info btn-sm rounded-circle" data-bs-toggle="modal" data-bs-target="#instructionsModal">
+            <i class="fas fa-question"></i>
+        </button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = '';  // Empty since we're on the same server
+        let selectedProvider = null;
+
+        // Provider selection
+        document.querySelectorAll('.provider-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selected class from all cards
+                document.querySelectorAll('.provider-card').forEach(c => c.classList.remove('selected'));
+                
+                // Add selected class to clicked card
+                this.classList.add('selected');
+                selectedProvider = this.dataset.provider;
+            });
+        });
+
+        // File upload handling
+        document.getElementById('templateFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            
+            if (file) {
+                fileName.textContent = file.name;
+                fileSize.textContent = `(${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+                fileInfo.style.display = 'block';
+            } else {
+                fileInfo.style.display = 'none';
+            }
+        });
+
+        // Form submission
+        document.getElementById('pptForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate inputs
+            const textInput = document.getElementById('textInput').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const guidance = document.getElementById('guidance').value.trim();
+            const templateFile = document.getElementById('templateFile').files[0];
+            const includeNotes = document.getElementById('includeNotes').checked;
+            
+            if (!textInput) {
+                showMessage('Please enter some text content.', 'error');
+                return;
+            }
+            
+            if (!selectedProvider) {
+                showMessage('Please select an AI provider.', 'error');
+                return;
+            }
+            
+            if (!apiKey) {
+                showMessage('Please enter your API key.', 'error');
+                return;
+            }
+            
+            // Show loading
+            showLoading(true);
+            hideMessage();
+            
+            try {
+                // Use FormData to handle file upload
+                const formData = new FormData();
+                formData.append('text', textInput);
+                formData.append('provider', selectedProvider);
+                formData.append('api_key', apiKey);
+                formData.append('guidance', guidance);
+                formData.append('include_notes', includeNotes.toString());
+                
+                if (templateFile) {
+                    formData.append('template', templateFile);
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/generate`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    // Download the file
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `presentation_${new Date().toISOString().slice(0,10)}.pptx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    let successMsg = '✅ PowerPoint generated successfully! Check your downloads.';
+                    if (includeNotes) {
+                        successMsg += ' Speaker notes have been included.';
+                    }
+                    if (templateFile) {
+                        successMsg += ' Your custom template was applied.';
+                    }
+                    showMessage(successMsg, 'success');
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to generate presentation');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            const button = document.getElementById('generateBtn');
+            
+            if (show) {
+                spinner.style.display = 'flex';
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            } else {
+                spinner.style.display = 'none';
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-magic"></i> Generate PowerPoint';
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageEl = document.getElementById('statusMessage');
+            messageEl.className = `status-message status-${type}`;
+            messageEl.textContent = message;
+            messageEl.style.display = 'block';
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    hideMessage();
+                }, 5000);
+            }
+        }
+
+        function hideMessage() {
+            document.getElementById('statusMessage').style.display = 'none';
+        }
+
+        // Select OpenAI by default
+        document.querySelector('[data-provider="openai"]').click();
+    </script>
+</body>
+</html>
