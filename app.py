@@ -58,7 +58,7 @@ class LLMOrchestrator:
             if self.provider == "openai":
                 client = openai.OpenAI(api_key=self.api_key)
                 response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4o-mini",
                     messages=[{"role": "user", "content": prompt}],
                     temperature=0.7
                 )
@@ -701,9 +701,9 @@ def get_providers():
     """Return list of supported LLM providers"""
     return jsonify({
         "providers": [
-            {"id": "openai", "name": "OpenAI (GPT-3.5/GPT-4)", "description": "OpenAI's ChatGPT models"},
-            {"id": "anthropic", "name": "Anthropic (Claude)", "description": "Anthropic's Claude models"},
-            {"id": "groq", "name": "Groq (Mixtral)", "description": "Groq's fast inference platform"}
+            {"id": "openai", "name": "OpenAI (GPT-4o-mini)", "description": "OpenAI's ChatGPT models"},
+            {"id": "anthropic", "name": "Anthropic (Claude-3-sonnet)", "description": "Anthropic's Claude models"},
+            {"id": "groq", "name": "Groq (llama-8b)", "description": "Groq's fast inference platform"}
         ]
     })
 
