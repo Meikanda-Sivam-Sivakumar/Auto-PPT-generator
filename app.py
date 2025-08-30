@@ -600,8 +600,7 @@ def home():
     """Serve the main HTML page"""
     try:
         # Get the path to the frontend directory
-        frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend')
-        return send_from_directory(frontend_path, 'index.html')
+        return send_from_directory('.', 'index.html')
     except Exception as e:
         logger.error(f"Error serving home page: {str(e)}")
         return jsonify({"error": "Frontend not found"}), 404
