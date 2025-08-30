@@ -6,4 +6,4 @@ anthropic==0.8.1
 groq>=0.31.0
 requests==2.31.0
 Werkzeug==2.3.7
-gunicorn==23.1.0
+gunicorn==23.0.0
